@@ -3,10 +3,10 @@ import type { MusicPlayerConfig } from "../types/musicConfig";
 // 音乐播放器配置
 export const musicPlayerConfig: MusicPlayerConfig = {
 	// 是否在导航栏显示音乐播放器入口
-	showInNavbar: true,
+	showInNavbar: false,
 
 	// 是否在侧边栏显示音乐播放器组件
-	showInSidebar: true,
+	showInSidebar: false,
 
 	// 使用方式："meting" 使用 Meting API，"local" 使用本地音乐列表
 	mode: "local",
@@ -46,14 +46,15 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	// 2. 或者直接填入歌词字符串内容
 	// lrc: "[00:00.00]歌词内容...",
 	local: {
-		playlist: [
-			{
-				name: "使一颗心免于哀伤",
-				artist: "知更鸟 / HOYO-MiX / Chevy",
-				url: "/assets/music/使一颗心免于哀伤-哼唱.mp3",
-				cover: "/assets/music/cover/109951169585655912.webp",
-				lrc: "",
-			},
-		],
+		// 播放列表（已清空：原来放的是主题自带的示例音乐，因版权问题移除）
+		// 以后想加自己的歌，取消下面注释并照格式填写：
+		// {
+		// 	name: "歌曲名",
+		// 	artist: "歌手",
+		// 	url: "/assets/music/你的歌.mp3",
+		// 	cover: "/assets/music/cover/封面.webp",
+		// 	lrc: "",
+		// },
+		playlist: [],
 	},
 };
