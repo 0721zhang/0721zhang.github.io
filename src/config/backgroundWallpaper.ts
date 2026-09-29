@@ -70,16 +70,9 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			title: "Rainsoaked Root",
 			// 主页横幅主标题字体大小
 			titleSize: "4.5rem",
-			// 主页横幅副标题
-			subtitle: [
-				"还在推石头",
-				"顺便贴几张",
-				"树根生长不着急",
-				"制造二氧化碳",
-				"写点小东西",
-				"记录我在这里",
-				"明天还有风",
-			],
+			// 主页横幅副标题（已清空，不显示）
+			// 需要时取消注释并填入文字即可恢复：
+			// subtitle: ["第一句", "第二句"],
 			// 主页横幅副标题字体大小
 			subtitleSize: "1.5rem",
 			typewriter: {

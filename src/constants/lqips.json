@@ -1,7 +1,5 @@
 {
   "src:assets/images/avatar.avif": "dcd8d5d1cecabea9a9",
-  "public:gallery/firefly-2026/cover.avif": "7588a28a8f989e8d88",
-  "public:gallery/firefly-2026/1.avif": "c8bca9dde6d2babfb5",
   "src:content/posts/images/1.avif": "b5b0b3bcb6bbe0e0df",
   "src:assets/images/logo/firefly-light.png": "000000000000000000",
   "src:assets/images/logo/firefly-dark.png": "ffffffffffffffffff",
@@ -13,5 +11,11 @@
   "src:assets/images/MobileWallpaper/c1.avif": "ebe2e8ebe3eae2d6e0",
   "src:assets/images/DesktopWallpaper/a3.avif": "3f322bb1967b82674e",
   "src:assets/images/DesktopWallpaper/a2.avif": "b0bbb2c8cfc4d3cfbc",
-  "src:assets/images/DesktopWallpaper/a1.avif": "969196cbbbb0aa8f6b"
+  "src:assets/images/DesktopWallpaper/a1.avif": "969196cbbbb0aa8f6b",
+  "public:gallery/mobile/c3.avif": "d1ccdbbeb8cc8a94b1",
+  "public:gallery/mobile/c2.avif": "d8d2dad9d3dbe8e2e8",
+  "public:gallery/mobile/c1.avif": "ebe2e8ebe3eae2d6e0",
+  "public:gallery/desktop/a3.avif": "3f322bb1967b82674e",
+  "public:gallery/desktop/a2.avif": "b0bbb2c8cfc4d3cfbc",
+  "public:gallery/desktop/a1.avif": "969196cbbbb0aa8f6b"
 }
