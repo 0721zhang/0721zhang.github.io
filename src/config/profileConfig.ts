@@ -33,17 +33,18 @@ export const profileConfig: ProfileConfig = {
 			url: "mailto:0721zhang@users.noreply.github.com",
 			showName: false,
 		},
-		{
-			name: "RSS",
-			icon: "fa7-solid:rss",
-			url: "/rss/",
-			showName: false,
-		},
-		{
-			name: "Atom",
-			icon: "fa7-solid:atom",
-			url: "/atom/",
-			showName: false,
-		},
+		// 订阅图标（RSS / Atom）已移除，需要恢复时取消下面的注释：
+		// {
+		// 	name: "RSS",
+		// 	icon: "fa7-solid:rss",
+		// 	url: "/rss/",
+		// 	showName: false,
+		// },
+		// {
+		// 	name: "Atom",
+		// 	icon: "fa7-solid:atom",
+		// 	url: "/atom/",
+		// 	showName: false,
+		// },
 	],
 };

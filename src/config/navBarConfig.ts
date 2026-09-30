@@ -98,7 +98,7 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 
 	// 自定义导航栏链接
 	links.push({
-		name: "链接",
+		name: "友情链接",
 		url: "#",
 		icon: "material-symbols:link",
 		// 子菜单
