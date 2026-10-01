@@ -1,6 +1,5 @@
 {
   "src:assets/images/avatar.avif": "dcd8d5d1cecabea9a9",
-  "src:content/posts/images/1.avif": "b5b0b3bcb6bbe0e0df",
   "public:assets/images/sponsor/wechat.png": "d5d5d5dad9d7dbd8cf",
   "public:assets/images/sponsor/alipay.png": "8ebbde91bedf93c0e0",
   "public:assets/images/ad/ad1.webp": "a1b8b68a8e918c8f93",
@@ -17,5 +16,9 @@
   "public:gallery/desktop/a2.avif": "b0bbb2c8cfc4d3cfbc",
   "public:gallery/desktop/a1.avif": "969196cbbbb0aa8f6b",
   "src:assets/images/logo/logo-light.png": "000000000000000000",
-  "src:assets/images/logo/logo-dark.png": "ffffffffffffffffff"
+  "src:assets/images/logo/logo-dark.png": "ffffffffffffffffff",
+  "src:content/posts/images/b4.avif": "d5cfb9d6d0badadacd",
+  "src:content/posts/images/b3.avif": "d5cfbad6d0badadbce",
+  "src:content/posts/images/b2.avif": "d5cfb9d6d0badadace",
+  "src:content/posts/images/b1.avif": "d5cfbad6d0badadbcd"
 }
