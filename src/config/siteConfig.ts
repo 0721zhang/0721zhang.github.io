@@ -48,7 +48,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "推石头的人",
 
 	// 站点 URL
-	site_url: "https://0721zhang.github.io",
+	site_url: "https://unhurriedroot.com",
 
 	// 站点描述
 	description:
