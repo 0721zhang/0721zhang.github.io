@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>解密小银杏</title>
+<style>
+/* 这段 :root 是独立运行的本地副本，接进站点时可以整段删除，届时会自动继承站点的同名变量。 */
+:root {
+  --hue: 165;
+  --page-bg: oklch(0.95 0.01 var(--hue));
+  --card-bg: #ffffff;
+  --deep-text: oklch(0.25 0.02 var(--hue));
+  --primary: oklch(0.70 0.14 var(--hue));
+  --btn-regular-bg: oklch(0.95 0.025 var(--hue));
+  --btn-content: oklch(0.55 0.12 var(--hue));
+  --line-divider: rgba(0, 0, 0, 0.08);
+
+  /* 点缀色：只在解密成功、档案编号、银杏叶装饰等少数位置使用。 */
+  --ginkgo: #D9A956;
+  --gold-brown: #7A5C2E;
+  --mint: #A9BE9D;
+  --paper: #F4F0E6;
+}
+:root.dark {
+  --page-bg: oklch(0.16 0.014 var(--hue));
+  --card-bg: oklch(0.23 0.015 var(--hue));
+  --deep-text: oklch(0.94 0.01 var(--hue));
+  --primary: oklch(0.75 0.14 var(--hue));
+  --btn-regular-bg: oklch(0.33 0.035 var(--hue));
+  --btn-content: oklch(0.75 0.1 var(--hue));
+  --line-divider: rgba(255, 255, 255, 0.08);
+}
+* { box-sizing: border-box; }
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--deep-text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+button, input { font: inherit; }
+button, summary { -webkit-tap-highlight-color: transparent; }
+button {
+  min-height: 46px;
+  padding: 9px 17px;
+  border: 1px solid var(--line-divider);
+  border-radius: 9px;
+  background: var(--btn-regular-bg);
+  color: var(--btn-content);
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--primary); }
+button:disabled { opacity: .55; cursor: default; }
+button.primary {
+  color: var(--deep-text);
+  border-color: var(--primary);
+  font-weight: 650;
+}
+button.quiet { background: transparent; color: var(--deep-text); }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; }
+h1, h2, h3 { line-height: 1.4; letter-spacing: .025em; }
+h1 { margin: 14px 0 8px; font-size: clamp(2rem, 7vw, 3.25rem); }
+h2 { font-size: clamp(1.45rem, 5vw, 2rem); margin: 8px 0 16px; }
+h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+p { margin: 12px 0; }
+a { color: var(--btn-content); text-underline-offset: 3px; }
+a:hover { color: var(--primary); }
+header {
+  max-width: 920px;
+  margin: auto;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand strong { font-size: .95rem; }
+.leaf { width: 40px; height: 40px; flex: 0 0 auto; color: var(--ginkgo); }
+nav { display: flex; flex-wrap: wrap; gap: 8px; }
+nav button { padding: 7px 12px; font-size: .88rem; }
+main { width: min(100% - 32px, 820px); margin: 10px auto 48px; }
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--line-divider);
+  border-radius: 16px;
+  padding: clamp(20px, 5vw, 44px);
+  min-width: 0;
+}
+.eyebrow { font-size: .8rem; letter-spacing: .13em; margin: 0 0 10px; }
+.archive-number { color: var(--ginkgo); font-family: ui-monospace, monospace; }
+.subtitle { font-size: 1.08rem; }
+.intro { margin: 30px 0; border-left: 2px solid var(--primary); padding-left: 20px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.small { font-size: .88rem; }
+.divider { border: 0; border-top: 1px solid var(--line-divider); margin: 28px 0; }
+.steps { display: flex; gap: 7px; margin: 0 0 20px; padding: 0; list-style: none; }
+.steps li {
+  flex: 1;
+  border-bottom: 3px solid var(--line-divider);
+  text-align: center;
+  font-size: .8rem;
+  padding-bottom: 7px;
+}
+.steps li.solved { border-color: var(--ginkgo); }
+.steps li.skipped { border-bottom-style: dashed; border-color: var(--btn-content); }
+.steps li.current { background: var(--btn-regular-bg); border-radius: 5px 5px 0 0; }
+.steps li.revisitable { cursor: pointer; }
+.steps li.revisitable:hover { background: var(--btn-regular-bg); border-radius: 5px 5px 0 0; }
+.algorithm {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--btn-regular-bg);
+  color: var(--btn-content);
+  font-size: .85rem;
+}
+.puzzle {
+  background: var(--btn-regular-bg);
+  color: var(--btn-content);
+  border: 1px solid var(--line-divider);
+  border-radius: 10px;
+  padding: 18px;
+  margin: 20px 0;
+  min-width: 0;
+}
+.puzzle-label { margin: 0 0 7px; font-size: .85rem; }
+.cipher {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 650 1.25rem/1.9 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: .09em;
+}
+code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+.rule { font-size: .93rem; }
+.ab-group { display: inline-block; white-space: nowrap; margin-right: .65em; }
+.ab-a { font-weight: 400; }
+.ab-b { font-weight: 800; text-decoration: underline; text-underline-offset: 4px; }
+fieldset { margin: 22px 0 0; padding: 0; border: 0; min-width: 0; }
+legend, .input-label { font-weight: 650; margin-bottom: 10px; display: block; }
+input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  padding: 11px 14px;
+  background: var(--card-bg);
+  color: var(--deep-text);
+  border: 1px solid var(--btn-content);
+  border-radius: 9px;
+}
+.options { display: grid; gap: 10px; }
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid var(--line-divider);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.option:has(input:checked) { border-color: var(--primary); background: var(--btn-regular-bg); }
+input[type="radio"] { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--btn-content); }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 20px 0; font-size: .93rem; }
+th, td { text-align: center; border: 1px solid var(--line-divider); padding: 12px 8px; }
+th { font-weight: 600; background: var(--btn-regular-bg); }
+th:first-child { width: 46%; text-align: left; }
+.records { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+.record { border: 1px solid var(--line-divider); border-radius: 10px; padding: 16px; }
+.record h3 { margin-top: 0; }
+.feedback { min-height: 1.8em; margin: 12px 0 0; font-size: .93rem; }
+.hints:empty { display: none; }
+.hints { border-top: 1px solid var(--line-divider); margin-top: 22px; padding-top: 5px; }
+.hint { white-space: pre-wrap; font-size: .93rem; }
+.hint h3 { font-size: .92rem; }
+.story { border-top: 2px solid var(--ginkgo); margin-top: 26px; padding-top: 20px; }
+.success { font-weight: 650; }
+.success::before { content: "✓"; color: var(--ginkgo); margin-right: 8px; }
+.story-block p { white-space: pre-line; }
+.explanation { background: var(--btn-regular-bg); padding: 16px; border-radius: 9px; margin-top: 20px; }
+.explanation h3 { margin-top: 0; }
+details { border-top: 1px solid var(--line-divider); padding: 14px 0; }
+summary { cursor: pointer; min-height: 44px; padding: 8px 0; font-weight: 600; }
+details p { margin-left: 4px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+.stat { background: var(--btn-regular-bg); border-radius: 9px; padding: 14px 8px; text-align: center; }
+.stat strong { display: block; font-size: 1.8rem; line-height: 1.4; }
+.stat span { font-size: .85rem; }
+.note { border-left: 2px solid var(--primary); padding-left: 14px; font-size: .92rem; }
+.hidden-entry { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line-divider); }
+.hidden-entry button { font-size: .88rem; }
+.storage {
+  width: min(100% - 32px, 820px);
+  margin: 0 auto 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--primary);
+  border-radius: 9px;
+  background: var(--card-bg);
+  font-size: .85rem;
+}
+[hidden] { display: none !important; }
+footer { text-align: center; font-size: .8rem; padding: 0 16px 26px; }
+/* 档案页右下角的出口：回到博客首页 */
+.exit-link {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 18px;
+  border: 2px solid var(--ginkgo);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #3D4A42;
+  font-size: .92rem;
+  font-weight: 650;
+  text-decoration: none;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, .1);
+  transition: background-color .18s ease, color .18s ease;
+}
+.exit-link:hover { background: var(--ginkgo); color: #ffffff; }
+@media (max-width: 540px) {
+  .exit-link { right: 14px; bottom: 14px; padding: 9px 14px; font-size: .85rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exit-link { transition: none; }
+}
+.morse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 6px 12px;
+  font-family: ui-monospace, monospace;
+  font-size: .9rem;
+}
+@media (max-width: 540px) {
+  header { padding: 16px; align-items: flex-start; }
+  header nav { justify-content: flex-end; }
+  .brand strong { display: none; }
+  .records { grid-template-columns: 1fr; }
+  .actions > button { flex: 1 1 120px; }
+  .cipher { font-size: 1.08rem; letter-spacing: .04em; }
+  th, td { padding: 10px 5px; font-size: .84rem; }
+  .intro { padding-left: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg class="leaf" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path d="M32 46C21 46 8 38 6 23C13 13 22 9 30 8L32 17L35 8C46 10 55 16 59 25C55 38 44 45 32 46Z" fill="currentColor"/>
+      <path d="M32 58V43M32 44L15 23M32 44L25 18M32 44L40 18M32 44L51 26" stroke="var(--gold-brown)" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <strong>解密小银杏</strong>
+  </div>
+  <nav aria-label="页面操作">
+    <button type="button" id="homeButton" class="quiet">返回入口</button>
+    <button type="button" id="archiveButton" class="quiet">直接阅读档案</button>
+    <button type="button" id="themeButton" aria-label="切换主题">切换主题</button>
+  </nav>
+</header>
+<p id="storageNotice" class="storage" role="status" hidden></p>
+<main id="app"></main>
+<footer>解密小银杏 · 一份尚未完全解锁的个人档案</footer>
+<noscript><p class="storage">请启用浏览器的 JavaScript，以进行解密和阅读档案。</p></noscript>
+<script>
+"use strict";
+
+/* 关卡正文、答案与提示集中配置；渲染逻辑不包含故事或判题答案。 */
+const LEVELS = [
+  {
+    id: 1, title: "名字从哪里来", type: "text", hidden: false,
+    algorithm: "凯撒位移",
+    question: "将一段经过字母位移的短文本还原。",
+    cipher: "URRW", key: 3, answer: "ROOT",
+    rule: "解密时，将每个密文字母在字母表中向前回退 3 位，即字母编号减 3。例如 U → R。",
+    hints: [
+      "这段密文中的每个字母都按同一个固定方向移动。",
+      "尝试向字母表前方移动 3 位。",
+      "U → R，按照相同规则处理其余字母。"
+    ],
+    story: [
+      {text: "「下雨树根不着急」，来自我童年记忆里的一个画面：老院子里的树根，淋着雨，露在地表。被浇透，却不腐坏；不急着长，也没有死。"},
+      {text: "英文名 Rainsoaked Root, Unhurried——被雨淋湿的树根，不着急。"},
+      {text: "为什么用它做博客的标识：它像我希望自己保持的状态——挨着雨，慢慢长。很多事不必急着证明，存在本身有自己的节奏。"}
+    ]
+  },
+  {
+    id: 2, title: "推石头的人", type: "text", hidden: false,
+    algorithm: "两栏栅栏密码",
+    question: "根据提示恢复被重新排列的字符。",
+    cipher: "SOEUHRTNPSE", answer: "STONEPUSHER",
+    rule: "加密时，将原文的字母从左到右交替写入两行，再先读完第一行、后读完第二行，得到密文。",
+    hints: [
+      "字母没有被替换，只是位置改变了。",
+      "尝试把字母交替放入两行。",
+      "先还原第一行 SOEUHR，再还原第二行 TNPSE，最后交替拼回原文。"
+    ],
+    story: [
+      {text: "「推石头的人」这个称呼，我认。"},
+      {text: "石头推上去，可能明天就滚回原点——这件事没有外部保证，也没有终点处的奖杯。但只要还在推，推法就是我自己选的：用自己的节奏推，给石头贴一张喜欢的贴纸，然后继续。"},
+      {text: "重要的也许不是永远抵达山顶，而是在一次次重新开始时，仍然知道自己为什么出发。"},
+      {text: "我推过的地方，就是路。"}
+    ]
+  },
+  {
+    id: 3, title: "为什么是银杏", type: "text", hidden: false,
+    algorithm: "维吉尼亚密码",
+    question: "根据上一关留下的线索找到密钥，再还原一段字母密文。",
+    cipher: "YBBXKG", key: "STONE", answer: "GINKGO",
+    rule: "规定 A=0、B=1，依此类推至 Z=25。将密钥循环使用；加密时，明文字母编号与对应密钥字母编号相加，对 26 取模。解密时做相应的减法，对 26 取模。",
+    hints: [
+      "与上一关的答案有关。可以点上面的进度条，回到已经解出的关卡查看。",
+      "从上一关的英文答案中找到 STONE。",
+      "使用 STONE 作为密钥，逐字母还原密文。"
+    ],
+    story: [
+      {text: "为什么是银杏？"},
+      {text: "因为一段记忆。"},
+      {text: "最早注意到银杏叶，是我最好的伙伴拿在手里玩的一小片叶子。后来，那片叶子留在了我这里。它成了我的象征物，也成了我们之间的信物。"},
+      {text: "「小银杏」这个名字也由此而来。"},
+      {text: "所以这个站点里到处都有银杏：标识、像素精灵镜叶，还有你正在看的这份档案。"}
+    ]
+  },
+  {
+    id: 4, title: "镜叶是谁", type: "text", hidden: false,
+    algorithm: "国际标准摩斯电码",
+    question: "将一串摩斯电码还原成英文字符。",
+    cipher: ".--- / .. / -. / --. / -.-- / .", answer: "JINGYE",
+    rule: "「.」表示点，「-」表示划，字母之间用「/」分隔。",
+    reference: {
+      title: "摩斯码字母表",
+      entries: [
+        "A .-", "B -...", "C -.-.", "D -..", "E .", "F ..-.",
+        "G --.", "H ....", "I ..", "J .---", "K -.-", "L .-..",
+        "M --", "N -.", "O ---", "P .--.", "Q --.-", "R .-.",
+        "S ...", "T -", "U ..-", "V ...-", "W .--", "X -..-",
+        "Y -.--", "Z --.."
+      ]
+    },
+    hints: [
+      "点和划分别组成不同的字母。",
+      "斜线用于分隔字母。",
+      "逐组查询摩斯码表，并将还原后的字母拼在一起。"
+    ],
+    story: [
+      {heading: "身份", text: "镜叶是这套系统的看板娘与档案守门员，正式代号 BH-KB01。她是系统运作逻辑的人格化界面——不是设计出来的吉祥物，是系统自身长出来的一张脸。"},
+      {heading: "职责", text: "她的核心职责有三条：保存最重要的东西、允许回滚、提醒系统在疲惫时降级。她胸前的安全镜芯不映出完整的人影，只映出观察者此刻最需要确认的一个微笑。"},
+      {heading: "视觉符号", text: "她的视觉符号系统（银杏叶、枇杷叶、双生树、逻辑指针、同心圆光环）全部是从系统功能里长出来的，不是贴上去的装饰。"},
+      {heading: "性格与口头禅", text: "所以她的性格也不是单一标签：对外冷静可靠，对自己人毒舌护短，独处时柔软，遇故障果断维护。她最常说的一句话是：「先保存，再讨论。」"},
+      {heading: "与小银杏的关系", text: "「小银杏是这棵树，镜叶是树上的一片叶子。」"}
+    ]
+  },
+  {
+    id: 5, title: "为什么开始学密码学", type: "text", hidden: false,
+    algorithm: "五位 A/B 编码",
+    question: "将 A、B 两种状态按规定分组，再恢复对应字母。",
+    cipher: "AAABA BAAAB BBAAA ABBBB BAABB ABBBA", answer: "CRYPTO",
+    display: "ab",
+    rule: "每五个 A/B 符号表示一个字母。规定 A=0、B=1，将五个符号视为一个五位二进制数，按 0–25 映射至 A–Z。每组从左至右读取，高位在前。示例：AAAAA = A、AAAAB = B、AAABA = C。",
+    hints: [
+      "这不是普通的字母替换，每五个符号才构成一个字母。",
+      "先将 A/B 转换成 0/1，再把五位二进制数转换成字母编号。",
+      "按 A=0、B=1……Z=25 的规则查询。"
+    ],
+    story: [
+      {text: "因为报志愿的时候，意外冲上了密码学这门专业。"},
+      {text: "起初，密码学是一门陌生的、令人头大的课程。后来，我一边上斯坦福的密码课，一边在和 AI 的互相校准中，逐渐掌握了密码学的要领。"},
+      {text: "再后来，我开始尝试把学到的知识变成可以运行、可以测量、也可以被质疑的实验。我不想只知道程序给出了什么结果，还想知道它为什么得到这个结果，以及在什么情况下会失败。"},
+      {text: "这个过程中，我用 Python 写实验、检查代码，尽量不把 AI 给出的程序当成无法解释的黑箱。"}
+    ]
+  },
+  {
+    id: 6, title: "相同的起点", type: "choice", hidden: false,
+    algorithm: "CTR 模式与 nonce 重用",
+    question: "哪组记录存在设计问题？",
+    rule: "N1、N2、N3 代表三个互不相同的 nonce 值。",
+    table: {
+      headers: ["项目", "记录组 A", "记录组 B"],
+      rows: [
+        ["密钥", "相同", "相同"],
+        ["第一次加密的 nonce", "N1", "N2"],
+        ["第二次加密的 nonce", "N3", "N2"]
+      ]
+    },
+    answer: "B",
+    options: [
+      {value: "A", label: "记录组 A"},
+      {value: "B", label: "记录组 B"}
+    ],
+    hints: [
+      "比较同一组内两次加密使用的 nonce。",
+      "关注第二次加密是否复用了第一次的 nonce。",
+      "相同密钥下，两次使用同一个 nonce 会使 CTR 密钥流重复。"
+    ],
+    explanation: "CTR 模式利用密钥和计数器生成密钥流，再与明文组合。相同密钥下重复使用相同 nonce，会使对应的密钥流重复，并可能泄露两份明文之间的关系。",
+    story: [
+      {text: "密码学里，算法和实现是两回事。"},
+      {text: "一个算法可以在纸面上安全，却因为一次 nonce 重用、一个参数管理失误，在工程层面被打穿。"},
+      {text: "这也是我关心工程细节的原因：调用方式、参数管理、数据处理流程——它们和算法本身一样重要。"}
+    ]
+  },
+  {
+    id: 7, title: "被改动的密文", type: "choice", hidden: false,
+    algorithm: "AEAD 认证标签与完整性验证",
+    question: "接收方应当接受哪一份记录？",
+    rule: "下面是同一条消息的两个版本。",
+    records: [
+      {title: "记录 A", text: "原始密文 C，原始认证标签 T。"},
+      {title: "记录 B", text: "密文 C 中的一个比特被修改，得到 C′；认证标签仍然是原来的 T。"}
+    ],
+    answer: "A",
+    options: [
+      {value: "A", label: "接受记录 A，拒绝记录 B"},
+      {value: "B", label: "接受记录 B，拒绝记录 A"}
+    ],
+    hints: [
+      "认证标签不只是附在密文后面的装饰。",
+      "密文被改动后，原认证标签通常不再匹配。",
+      "接收方必须执行认证验证，不能只看内容是否还能读懂。"
+    ],
+    explanation: "AEAD 将加密与认证结合起来。在正确使用密钥、nonce 和验证流程的前提下，数据被篡改时，认证验证应当失败；接收方不应继续把验证失败的内容当成有效消息。",
+    story: [
+      {text: "《不同分块粒度下 AEAD 文件加密性能与存储开销实验研究——以 AES-GCM 与 ChaCha20-Poly1305 为例》。"},
+      {text: "我正在尝试回答一些更具体的问题："},
+      {text: "当一个文件被分成不同大小的数据块时，加密速度、解密速度、内存占用和存储开销会如何变化？"},
+      {text: "AES-GCM 和 ChaCha20-Poly1305 在这些条件下又会有什么差异？"},
+      {text: "对我而言，学习密码学不只是理解算法，还包括把算法放进真实的工程场景，观察它的表现，并用实验检验自己的判断。"}
+    ]
+  },
+  {
+    id: "hidden", title: "数字锁", type: "number", hidden: true,
+    algorithm: "教学用小数字 RSA",
+    question: "根据公开参数和密文，还原明文 m。",
+    rule: "这是一组教学用的 RSA 公开参数：n 是模数，e 是公开指数，c 是密文。明文 m 满足 m^e ≡ c（mod n）。",
+    parameters: [
+      {label: "公钥模数", value: "n = 55"},
+      {label: "公钥指数", value: "e = 3"},
+      {label: "密文", value: "c = 14"}
+    ],
+    answer: "9",
+    hints: [
+      "RSA 的安全性建立在「n 很难分解成两个素数」这件事上。但这里的 n 是故意取小的——先试试能不能把它拆成两个素数相乘。",
+      "分解出两个素数 p 和 q 之后：先算 φ(n) = (p − 1) × (q − 1)，再找一个 d，满足 (e × d) mod φ(n) = 1。",
+      "代入解密公式 m = c^d mod n。注意不要直接算 14 的 27 次方（数字会大到没法心算），每乘一步就对 55 取一次余数。"
+    ],
+    story: [
+      {text: "「喝的水放这了，石头还在这里，贴纸也贴好了。你要是也想推，顺手推一把。」"}
+    ]
+  }
+];
+
+/* 总览独立使用主题摘要，不重复粘贴全部关卡故事；未提供网址的条目不创建链接。 */
+const PROFILE = [
+  {
+    title: "名字",
+    summary: "小银杏、下雨树根不着急",
+    details: [
+      "英文名：Rainsoaked Root, Unhurried。",
+      "「下雨树根不着急」来自童年老院子里淋雨的树根，也寄托着挨着雨、慢慢长，不急着证明自己的愿望。"
+    ]
+  },
+  {
+    title: "象征物",
+    summary: "银杏叶",
+    details: [
+      "来自我最好的伙伴手里的一片叶子，我们之间最早的信物。「小银杏」这个名字也由此而来。"
+    ]
+  },
+  {
+    title: "角色",
+    summary: "镜叶 · 看板娘与档案守门员",
+    details: [
+      "正式代号 BH-KB01，是系统运作逻辑的人格化界面。职责是保存重要内容、允许回滚，以及在系统疲惫时提醒降级。",
+      "视觉符号包括银杏叶、枇杷叶、双生树、逻辑指针与同心圆光环。胸前的安全镜芯映出观察者此刻最需要确认的一个微笑。",
+      "对外冷静可靠，对自己人毒舌护短，独处时柔软，遇故障果断维护。口头禅：「先保存，再讨论。」",
+      "「小银杏是这棵树，镜叶是树上的一片叶子。」"
+    ]
+  },
+  {
+    title: "信念",
+    summary: "「推石头的人」",
+    details: [
+      "石头可能滚回原点，但只要还在推，推法就是我自己选的。重要的不是永远抵达山顶，而是在重新开始时仍然知道自己为什么出发。",
+      "我推过的地方，就是路。"
+    ]
+  },
+  {
+    title: "正在学习",
+    summary: "密码学、Python 与相关工程实践",
+    details: [
+      "报志愿时意外进入密码学专业。从陌生的课程出发，通过斯坦福的密码课和与 AI 的互相校准，逐渐掌握要领。",
+      "用 Python 写实验、检查代码，把知识变成可以运行、可以测量、也可以被质疑的实验，不把 AI 给出的程序当成无法解释的黑箱。",
+      "关注算法与实现之间的区别，以及调用方式、参数管理和数据处理流程等工程细节。"
+    ]
+  },
+  {
+    title: "正在研究",
+    summary: "AEAD 文件加密的性能与存储开销",
+    details: [
+      "《不同分块粒度下 AEAD 文件加密性能与存储开销实验研究——以 AES-GCM 与 ChaCha20-Poly1305 为例》。",
+      "比较不同文件分块大小下的加密速度、解密速度、内存占用与存储开销，以及 AES-GCM 和 ChaCha20-Poly1305 的差异。把算法放进真实工程场景，用实验检验判断。"
+    ]
+  },
+  {
+    title: "其他内容",
+    summary: "博客文章、学习笔记与开源项目",
+    details: [
+      "博客文章",
+      "学习笔记",
+      {before: "开源项目：", label: "break-reminder", url: "https://github.com/0721zhang/break-reminder"},
+      "后续研究入口：AEAD 文件加密课题"
+    ]
+  }
+];
+
+const INTRO = [
+  "了解一个人，本质上就是解密。",
+  "你眼前是一份关于「小银杏」的档案。",
+  "有些内容已经公开，有些内容则藏在不同的密码里。",
+  "你可以尝试亲手还原它们，也可以随时直接阅读完整档案。"
+];
+const MAIN_COUNT = LEVELS.filter(level => !level.hidden).length;
+const HIDDEN_INDEX = LEVELS.findIndex(level => level.hidden);
+const STORAGE_KEY = "ginkgo-decrypt-v1";
+const app = document.getElementById("app");
+const storageNotice = document.getElementById("storageNotice");
+let storageAvailable = true;
+
+function freshState() {
+  return {
+    version: 1,
+    theme: null,
+    page: "home",
+    current: 0,
+    mainCursor: 0,
+    progress: LEVELS.map(() => ({status: "pending", hints: 0}))
+  };
+}
+function showStorageNotice(text) {
+  storageNotice.textContent = text;
+  storageNotice.hidden = false;
+}
+/* 严格检查存档结构；损坏的存档不会进入页面渲染逻辑。 */
+function validateState(value) {
+  if (!value || value.version !== 1 ||
+      ![null, "light", "dark"].includes(value.theme) ||
+      !["home", "level", "archive"].includes(value.page) ||
+      !Number.isInteger(value.current) ||
+      value.current < 0 || value.current >= LEVELS.length ||
+      !Number.isInteger(value.mainCursor) ||
+      value.mainCursor < 0 || value.mainCursor >= MAIN_COUNT ||
+      !Array.isArray(value.progress) || value.progress.length !== LEVELS.length) {
+    return false;
+  }
+  if (!value.progress.every((p, i) =>
+    p && ["pending", "solved", "skipped"].includes(p.status) &&
+    Number.isInteger(p.hints) && p.hints >= 0 &&
+    p.hints <= LEVELS[i].hints.length)) return false;
+
+  // 主线只能顺序前进：遇到未完成关卡后，不应存在已完成的后续关卡。
+  let pendingSeen = false;
+  for (let i = 0; i < MAIN_COUNT; i++) {
+    if (value.progress[i].status === "pending") pendingSeen = true;
+    else if (pendingSeen) return false;
+  }
+  if (value.page === "level" && value.current < MAIN_COUNT) {
+    if (value.progress.slice(0, value.current).some(p => p.status === "pending")) return false;
+  }
+  return true;
+}
+function loadState() {
+  let raw;
+  try {
+    raw = window.localStorage.getItem(STORAGE_KEY);
+  } catch (error) {
+    storageAvailable = false;
+    showStorageNotice("浏览器无法读取本地存储。进度和主题仅在本次页面打开期间保留，关闭后可能丢失。");
+    return freshState();
+  }
+  if (raw === null) return freshState();
+  try {
+    const parsed = JSON.parse(raw);
+    if (!validateState(parsed)) throw new Error("Invalid save");
+    // 只复制受支持字段，避免存档中的额外属性影响运行。
+    return {
+      version: 1,
+      theme: parsed.theme,
+      page: parsed.page,
+      current: parsed.current,
+      mainCursor: parsed.mainCursor,
+      progress: parsed.progress.map(p => ({status: p.status, hints: p.hints}))
+    };
+  } catch (error) {
+    showStorageNotice("保存的数据损坏，无法恢复；本次已从入口重新开始。后续进度将尝试重新保存。");
+    return freshState();
+  }
+}
+let state = loadState();
+
+function saveState() {
+  if (!storageAvailable) return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    storageAvailable = false;
+    showStorageNotice("浏览器无法保存本地数据。当前游戏仍可继续，但本次进度和主题更改仅临时保留，关闭页面后可能丢失。");
+  }
+}
+
+/* 没有手动偏好时才跟随系统；切换主题不触发页面重绘。 */
+const systemTheme = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+function applyTheme() {
+  const dark = state.theme ? state.theme === "dark" : !!(systemTheme && systemTheme.matches);
+  document.documentElement.classList.toggle("dark", dark);
+  const button = document.getElementById("themeButton");
+  button.textContent = dark ? "切换亮色" : "切换暗色";
+  button.setAttribute("aria-label", dark ? "切换到亮色主题" : "切换到暗色主题");
+  button.title = state.theme ? "已选择手动主题" : "当前跟随系统主题";
+}
+document.getElementById("themeButton").addEventListener("click", () => {
+  state.theme = document.documentElement.classList.contains("dark") ? "light" : "dark";
+  applyTheme();
+  saveState();
+});
+if (systemTheme) {
+  const onSystemThemeChange = () => { if (state.theme === null) applyTheme(); };
+  if (systemTheme.addEventListener) systemTheme.addEventListener("change", onSystemThemeChange);
+  else if (systemTheme.addListener) systemTheme.addListener(onSystemThemeChange);
+}
+applyTheme();
+
+/* 所有动态正文通过 textContent 写入，不把配置或用户输入当作 HTML 执行。 */
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function button(text, onClick, className) {
+  const node = el("button", className, text);
+  node.type = "button";
+  if (onClick) node.addEventListener("click", onClick);
+  return node;
+}
+function heading(tag, text) {
+  const node = el(tag, "", text);
+  node.tabIndex = -1;
+  node.dataset.pageHeading = "true";
+  return node;
+}
+function mainStats() {
+  return state.progress.slice(0, MAIN_COUNT).reduce((sum, p) => {
+    if (p.status === "solved") sum.solved++;
+    if (p.status === "skipped") sum.skipped++;
+    sum.hints += p.hints;
+    return sum;
+  }, {solved: 0, skipped: 0, hints: 0});
+}
+function mainFinished() {
+  return state.progress.slice(0, MAIN_COUNT).every(p => p.status !== "pending");
+}
+function go(page, index) {
+  state.page = page;
+  if (page === "level" && Number.isInteger(index)) {
+    state.current = index;
+    if (!LEVELS[index].hidden) state.mainCursor = index;
+  }
+  saveState();
+  render(true);
+}
+function startMain() {
+  if (mainFinished()) {
+    go("archive");
+    return;
+  }
+  const firstPending = state.progress.slice(0, MAIN_COUNT).findIndex(p => p.status === "pending");
+  const cursor = state.mainCursor;
+  // 已解出的当前关保留故事阅读位置；跳过的关卡不会阻挡流程。
+  const canResume = cursor <= firstPending &&
+    state.progress[cursor].status !== "skipped" &&
+    state.progress.slice(0, cursor).every(p => p.status !== "pending");
+  go("level", canResume ? cursor : firstPending);
+}
+function advance(index) {
+  if (LEVELS[index].hidden || index === MAIN_COUNT - 1) go("archive");
+  else go("level", index + 1);
+}
+/* 回看已经解出或跳过的关卡：只改变阅读位置，不动主线推进游标 mainCursor。
+   否则从前面某关回看后关掉页面，下次打开会被带到回看的位置，而不是主线所在的位置。 */
+function goBack(index) {
+  state.page = "level";
+  state.current = index;
+  saveState();
+  render(true);
+}
+/* 清空进度并回到初始状态。主题属于显示偏好，不随进度一起清除。 */
+function clearProgress() {
+  if (!window.confirm("确定清除全部解密进度，回到初始状态吗？此操作不可撤销。")) return;
+  const keptTheme = state.theme;
+  if (storageAvailable) {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      storageAvailable = false;
+    }
+  }
+  state = freshState();
+  state.theme = keptTheme;
+  go("home");
+}
+document.getElementById("homeButton").addEventListener("click", () => go("home"));
+document.getElementById("archiveButton").addEventListener("click", () => go("archive"));
+
+function renderHome() {
+  const card = el("section", "card");
+  card.append(
+    el("p", "eyebrow archive-number", "个人档案"),
+    heading("h1", "解密小银杏"),
+    el("p", "subtitle", "一份尚未完全解锁的个人档案")
+  );
+  const intro = el("div", "intro");
+  INTRO.forEach(text => intro.append(el("p", "", text)));
+  card.append(intro);
+  const actions = el("div", "actions");
+  actions.append(
+    button("开始解密", startMain, "primary"),
+    button("直接阅读档案", () => go("archive"), "quiet")
+  );
+  card.append(actions);
+  const stats = mainStats();
+  if (stats.solved || stats.skipped || stats.hints) {
+    card.append(el("p", "small", `主线记录：已解出 ${stats.solved} 关 · 已跳过 ${stats.skipped} 关 · 求助 ${stats.hints} 次。开始解密将恢复相应进度。`));
+  }
+  app.append(card);
+}
+function renderSteps(index) {
+  const list = el("ol", "steps");
+  list.setAttribute("aria-label", "七道主线关卡进度");
+  LEVELS.slice(0, MAIN_COUNT).forEach((level, i) => {
+    const p = state.progress[i];
+    const statusText = {pending: "未解出", solved: "已解出", skipped: "已跳过"}[p.status];
+    // 已经解出或跳过的关卡可以点回去回看；还没做到的关卡不允许跳过去。
+    const revisitable = p.status !== "pending" && i !== index;
+    const item = el("li",
+      p.status + (i === index ? " current" : "") + (revisitable ? " revisitable" : ""),
+      String(i + 1));
+    item.title = `${level.title}：${statusText}${revisitable ? "（点击回看）" : ""}`;
+    item.setAttribute("aria-label",
+      `第 ${i + 1} 关，${level.title}，${statusText}${revisitable ? "，点击回看" : ""}`);
+    if (i === index) item.setAttribute("aria-current", "step");
+    if (revisitable) {
+      item.setAttribute("role", "button");
+      item.tabIndex = 0;
+      item.addEventListener("click", () => goBack(i));
+      item.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          goBack(i);
+        }
+      });
+    }
+    list.append(item);
+  });
+  return list;
+}
+function renderCipher(level) {
+  const box = el("div", "puzzle");
+  box.append(el("p", "puzzle-label", "密文"));
+  const code = el("pre", "cipher");
+  if (level.display === "ab") {
+    code.setAttribute("aria-label", level.cipher);
+    const groups = level.cipher.split(" ");
+    groups.forEach((group, i) => {
+      const span = el("span", "ab-group");
+      for (const ch of group) span.append(el("span", ch === "A" ? "ab-a" : "ab-b", ch));
+      code.append(span);
+      if (i < groups.length - 1) code.append(document.createTextNode(" "));
+    });
+    box.append(code, el("p", "small", "图例：普通字重 A = 0；粗体下划线 B = 1。"));
+  } else {
+    code.textContent = level.cipher;
+    box.append(code);
+  }
+  return box;
+}
+function renderTable(data) {
+  const table = el("table");
+  table.setAttribute("aria-label", "两组加密记录");
+  const head = el("thead");
+  const headRow = el("tr");
+  data.headers.forEach(text => {
+    const cell = el("th", "", text);
+    cell.scope = "col";
+    headRow.append(cell);
+  });
+  head.append(headRow);
+  const body = el("tbody");
+  data.rows.forEach(row => {
+    const tr = el("tr");
+    row.forEach((text, i) => {
+      const cell = el(i === 0 ? "th" : "td", "", text);
+      if (i === 0) cell.scope = "row";
+      tr.append(cell);
+    });
+    body.append(tr);
+  });
+  table.append(head, body);
+  return table;
+}
+function renderHints(container, index, hintButton) {
+  const level = LEVELS[index];
+  const progress = state.progress[index];
+  container.replaceChildren();
+  level.hints.slice(0, progress.hints).forEach((text, i) => {
+    const section = el("section", "hint");
+    section.append(el("h3", "", `提示 ${i + 1}`), el("p", "", text));
+    container.append(section);
+  });
+  hintButton.disabled = progress.status === "solved" || progress.hints >= level.hints.length;
+  hintButton.textContent = progress.hints === level.hints.length
+    ? `提示（${progress.hints}/${level.hints.length}，已全部展开）`
+    : `提示（${progress.hints}/${level.hints.length}）`;
+}
+function renderStory(level) {
+  const section = el("section", "story");
+  section.id = "solvedStory";
+  section.tabIndex = -1;
+  section.setAttribute("aria-label", "解密成功");
+  section.append(
+    el("p", "success", "解密成功。"),
+    el("h3", "", level.hidden ? "隐藏留言" : "档案内容")
+  );
+  level.story.forEach(block => {
+    const part = el("div", "story-block");
+    if (block.heading) part.append(el("h3", "", block.heading));
+    part.append(el("p", "", block.text));
+    section.append(part);
+  });
+  if (level.explanation) {
+    const explanation = el("div", "explanation");
+    explanation.append(el("h3", "", "解题说明"), el("p", "", level.explanation));
+    section.append(explanation);
+  }
+  return section;
+}
+function renderLevel(index) {
+  const level = LEVELS[index];
+  const progress = state.progress[index];
+  const solved = progress.status === "solved";
+  const card = el("section", "card");
+  if (!level.hidden) card.append(renderSteps(index));
+  card.append(
+    el("p", "eyebrow archive-number", level.hidden ? "隐藏关卡 · 独立记录" : `档案 ${String(level.id).padStart(2, "0")} / 07`),
+    heading("h2", level.title),
+    el("p", "algorithm", level.algorithm),
+    el("p", "", level.question)
+  );
+  if (level.hidden) {
+    const statusText = {pending: "未解出", solved: "已解出", skipped: "已跳过，可重新尝试"}[progress.status];
+    card.append(el("p", "small", `隐藏关：${statusText} · 求助 ${progress.hints} 次。此关不影响主线档案与探索记录。`));
+  }
+  if (level.rule) card.append(el("p", "rule", level.rule));
+  if (level.cipher) card.append(renderCipher(level));
+  if (level.table) card.append(renderTable(level.table));
+  if (level.records) {
+    const records = el("div", "records");
+    level.records.forEach(record => {
+      const item = el("section", "record");
+      item.append(el("h3", "", record.title), el("p", "", record.text));
+      records.append(item);
+    });
+    card.append(records);
+  }
+  if (level.parameters) {
+    const box = el("div", "puzzle");
+    level.parameters.forEach(parameter => {
+      const p = el("p");
+      p.append(document.createTextNode(parameter.label + "："), el("code", "", parameter.value));
+      box.append(p);
+    });
+    card.append(box);
+  }
+  if (level.reference) {
+    const section = el("section");
+    section.append(el("h3", "", level.reference.title));
+    const grid = el("div", "morse-grid");
+    level.reference.entries.forEach(entry => grid.append(el("span", "", entry)));
+    section.append(grid);
+    card.append(section);
+  }
+
+  const form = el("form");
+  form.noValidate = true;
+  const feedback = el("p", "feedback");
+  feedback.id = "answerFeedback";
+  feedback.setAttribute("role", "status");
+  feedback.setAttribute("aria-live", "polite");
+  let input = null;
+  if (level.type === "choice") {
+    const fieldset = el("fieldset");
+    fieldset.disabled = solved;
+    fieldset.append(el("legend", "", "请选择一项"));
+    const options = el("div", "options");
+    level.options.forEach(option => {
+      const label = el("label", "option");
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "answer";
+      radio.value = option.value;
+      radio.setAttribute("aria-describedby", "answerFeedback");
+      if (solved && option.value === level.answer) radio.checked = true;
+      label.append(radio, el("span", "", option.label));
+      options.append(label);
+    });
+    fieldset.append(options);
+    form.append(fieldset);
+  } else {
+    const label = el("label", "input-label",
+      level.type === "number" ? "请输入还原后的明文数字" : "请输入还原后的英文单词");
+    label.htmlFor = "answerInput";
+    input = document.createElement("input");
+    input.id = "answerInput";
+    input.name = "answer";
+    input.type = "text";
+    input.inputMode = level.type === "number" ? "numeric" : "text";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.setAttribute("autocapitalize", "none");
+    input.setAttribute("aria-describedby", "answerFeedback");
+    input.disabled = solved;
+    if (solved) input.value = level.answer;
+    form.append(label, input);
+  }
+
+  const actions = el("div", "actions");
+  const submit = button("提交答案", null, "primary");
+  submit.type = "submit";
+  submit.disabled = solved;
+  const hintButton = button("提示");
+  const skip = button("跳过本关", () => {
+    if (state.progress[index].status === "solved") return;
+    state.progress[index].status = "skipped";
+    advance(index);
+  }, "quiet");
+  skip.disabled = solved;
+  actions.append(submit, hintButton, skip);
+  form.append(actions, feedback);
+
+  const hints = el("div", "hints");
+  hints.id = "levelHints";
+  hints.setAttribute("aria-live", "polite");
+  hintButton.setAttribute("aria-controls", "levelHints");
+  hintButton.addEventListener("click", () => {
+    const p = state.progress[index];
+    if (p.status === "solved" || p.hints >= level.hints.length) return;
+    // 提示次数由已展开层数派生，不另设容易重复递增的计数器。
+    p.hints++;
+    saveState();
+    renderHints(hints, index, hintButton);
+    if (level.hidden) {
+      const hiddenInfo = card.querySelector(".small");
+      if (hiddenInfo) {
+        const statusText = p.status === "skipped" ? "已跳过，可重新尝试" : "未解出";
+        hiddenInfo.textContent = `隐藏关：${statusText} · 求助 ${p.hints} 次。此关不影响主线档案与探索记录。`;
+      }
+    }
+  });
+  renderHints(hints, index, hintButton);
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    if (state.progress[index].status === "solved") return;
+    let value;
+    if (level.type === "choice") {
+      const selected = form.querySelector('input[name="answer"]:checked');
+      if (!selected) {
+        feedback.textContent = "请先选择一项。";
+        return;
+      }
+      value = selected.value;
+    } else {
+      value = input.value.trim();
+      if (!value) {
+        feedback.textContent = "请先输入答案。";
+        input.focus();
+        return;
+      }
+      // 仅忽略首尾空格和英文字母大小写，不删除中间字符。
+      if (level.type === "text") value = value.toUpperCase();
+    }
+    if (value !== level.answer) {
+      feedback.textContent = "还没有对上，再试试看。";
+      return;
+    }
+    state.progress[index].status = "solved";
+    saveState();
+    render(false);
+    const story = document.getElementById("solvedStory");
+    if (story) {
+      story.focus({preventScroll: true});
+      story.scrollIntoView({block: "start"});
+    }
+  });
+  card.append(form, hints);
+  if (solved) {
+    card.append(renderStory(level));
+    const next = el("div", "actions");
+    const label = level.hidden ? "返回完整档案"
+      : index === MAIN_COUNT - 1 ? "下一关 · 查看完整档案" : "下一关";
+    next.append(button(label, () => advance(index), "primary"));
+    card.append(next);
+  }
+  app.append(card);
+}
+function renderArchive() {
+  const card = el("section", "card");
+  card.append(
+    el("p", "eyebrow archive-number", "个人档案 · 总览"),
+    heading("h2", "小银杏的完整档案"),
+    el("p", "", "小银杏、下雨树根不着急（Rainsoaked Root, Unhurried）。")
+  );
+  PROFILE.forEach(item => {
+    const detail = el("details");
+    detail.append(el("summary", "", `${item.title}｜${item.summary}`));
+    item.details.forEach(entry => {
+      // 条目可以是纯文本，也可以是 {before, label, url} 形式的外链。
+      if (typeof entry === "string") {
+        detail.append(el("p", "", entry));
+        return;
+      }
+      const p = el("p");
+      p.append(document.createTextNode(entry.before));
+      const link = el("a", "", entry.label);
+      link.href = entry.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      p.append(link);
+      detail.append(p);
+    });
+    card.append(detail);
+  });
+  card.append(el("hr", "divider"), el("h3", "", "探索记录"));
+  const counts = mainStats();
+  const grid = el("div", "stats");
+  [
+    ["已解出关卡数", `${counts.solved} / ${MAIN_COUNT}`],
+    ["已跳过关卡数", String(counts.skipped)],
+    ["求助次数", String(counts.hints)]
+  ].forEach(([label, value]) => {
+    const stat = el("div", "stat");
+    stat.append(el("strong", "", value), el("span", "", label));
+    grid.append(stat);
+  });
+  card.append(grid);
+  card.append(el("p", "small", mainFinished()
+    ? "七道主线关卡均已解出或跳过。以上记录只统计主线，不包含隐藏关。"
+    : "直接阅读档案不会改变解出、跳过或提示记录。以上记录只统计七道主线关卡。"));
+  card.append(el("p", "note", "这不是考试，不进行密码学水平排名，不根据提示次数扣分；记录的是一次探索过程，而不是考试成绩。"));
+
+  const actions = el("div", "actions");
+  actions.append(button("返回入口", () => go("home"), "quiet"));
+  if (!mainFinished()) actions.append(button("返回主线解密", startMain, "primary"));
+  actions.append(button("清除进度，重新开始", clearProgress, "quiet"));
+  card.append(actions);
+
+  const hiddenEntry = el("div", "hidden-entry");
+  hiddenEntry.append(button("数字锁 · 隐藏关卡", () => go("level", HIDDEN_INDEX), "quiet"));
+  const hiddenProgress = state.progress[HIDDEN_INDEX];
+  const hiddenStatus = {pending: "未解出", solved: "已解出", skipped: "已跳过"}[hiddenProgress.status];
+  hiddenEntry.append(el("p", "small", `独立记录：${hiddenStatus} · 求助 ${hiddenProgress.hints} 次。可跳过，不影响主线。`));
+  card.append(hiddenEntry);
+  // 右下角出口：回到博客首页
+  const exitLink = el("a", "exit-link", "← 回到博客");
+  exitLink.href = "/";
+  card.append(exitLink);
+  app.append(card);
+}
+function render(moveFocus) {
+  app.replaceChildren();
+  if (state.page === "level") renderLevel(state.current);
+  else if (state.page === "archive") renderArchive();
+  else renderHome();
+  document.getElementById("homeButton").disabled = state.page === "home";
+  document.getElementById("archiveButton").disabled = state.page === "archive";
+  document.title = state.page === "level"
+    ? `${LEVELS[state.current].title} · 解密小银杏`
+    : state.page === "archive" ? "完整档案 · 解密小银杏" : "解密小银杏";
+  if (moveFocus) {
+    const title = app.querySelector("[data-page-heading]");
+    if (title) title.focus({preventScroll: true});
+    window.scrollTo(0, 0);
+  }
+}
+
+// 初次写入也能发现“可读但不可写”的存储环境，不声称虚假的持久化成功。
+saveState();
+render(false);
+</script>
+</body>
+</html>
