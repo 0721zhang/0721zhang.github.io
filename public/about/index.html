@@ -232,6 +232,8 @@ footer { text-align: center; font-size: .8rem; padding: 0 16px 26px; }
   transition: background-color .18s ease, color .18s ease;
 }
 .exit-link:hover { background: var(--ginkgo); color: #ffffff; }
+/* 放在按钮行右端时使用 */
+.exit-link-end { margin-left: auto; }
 @media (max-width: 540px) {
   .hidden-entry { align-items: stretch; }
   .exit-link { width: 100%; justify-content: center; }
@@ -744,6 +746,10 @@ function renderHome() {
     button("开始解密", startMain, "primary"),
     button("直接阅读档案", () => go("archive"), "quiet")
   );
+  // 入口页也留一条回博客的路，放在这一行右端
+  const homeExit = el("a", "exit-link exit-link-end", "← 回到博客");
+  homeExit.href = "/";
+  actions.append(homeExit);
   card.append(actions);
   const stats = mainStats();
   if (stats.solved || stats.skipped || stats.hints) {
