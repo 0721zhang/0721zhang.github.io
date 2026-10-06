@@ -401,6 +401,21 @@ const ogImageAlt = propsOgImageAlt ?? pageTitle;
       const hue = localStorage.getItem("hue") || configHue;
       document.documentElement.style.setProperty("--hue", hue);
 
+      // 让所有指向 /about/ 的链接绕过 Swup，走浏览器原生整页导航。
+      // /about/ 是 public/about/ 下的独立 HTML（「解密小银杏」游戏），页面里没有 Swup 的容器；
+      // 若被 Swup 接管，它会报 "Container mismatch, aborting" 并中途终止，
+      // 而此时它已经给 <html>/<body> 加过页面切换保护类，残留状态会让返回后的首页布局整体错乱。
+      // data-no-swup 是 Swup 库内建的检查（el.closest('[data-no-swup]')），最可靠。
+      const markAboutLinks = () => {
+        document.querySelectorAll('a[href*="/about"]:not([data-no-swup])').forEach((link) => {
+          link.setAttribute("data-no-swup", "");
+        });
+      };
+      markAboutLinks();
+      document.addEventListener("DOMContentLoaded", markAboutLinks);
+      document.addEventListener("astro:page-load", markAboutLinks);
+      document.addEventListener("swup:page:view", markAboutLinks);
+
       // 设置卡片透明度（全屏透明模式下使用），优先使用用户自定义值
       const storedCardOpacity = localStorage.getItem("overlayCardOpacity");
       const parsedCardOpacity = storedCardOpacity === null ? NaN : Number.parseFloat(storedCardOpacity);
