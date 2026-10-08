@@ -75,6 +75,12 @@ export const booknavConfig: BooknavGroup[] = [
 				desc: "大模型能力排行榜",
 				weight: 4,
 			},
+			{
+				title: "Aizex",
+				url: "https://aizex.net/",
+				desc: "多模型合租面板",
+				weight: 3,
+			},
 		],
 	},
 	{
