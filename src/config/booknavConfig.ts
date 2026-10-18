@@ -129,6 +129,18 @@ export const booknavConfig: BooknavGroup[] = [
 				desc: "超星学习平台",
 				weight: 8,
 			},
+			{
+				title: "Python cryptography 文档",
+				url: "https://cryptography.io/en/stable/hazmat/primitives/aead/",
+				desc: "官方文档：AEAD 等密码学原语",
+				weight: 7,
+			},
+			{
+				title: "RFC Editor",
+				url: "https://www.rfc-editor.org/",
+				desc: "RFC 的官方发布与存档入口",
+				weight: 6,
+			},
 		],
 	},
 	{
