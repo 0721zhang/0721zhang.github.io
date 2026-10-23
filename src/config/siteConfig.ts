@@ -51,8 +51,7 @@ export const siteConfig: SiteConfig = {
 	site_url: "https://unhurriedroot.com",
 
 	// 站点描述
-	description:
-		"制造二氧化碳的同时写点小东西。",
+	description: "制造二氧化碳的同时写点小东西。",
 
 	// 主题色
 	themeColor: {
