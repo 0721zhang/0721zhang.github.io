@@ -139,8 +139,8 @@ const coverLqipProps = cover
               class="gallery-masonry"
               style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}
             >
-              {photos.map((photo) => (
-                <PhotoCard src={photo} albumId={albumMeta.id} />
+              {photos.map((photo, index) => (
+                <PhotoCard src={photo} albumId={albumMeta.id} alt={`${albumMeta.name} ${index + 1}`} />
               ))}
             </div>
           </EncryptedContent>
@@ -149,8 +149,8 @@ const coverLqipProps = cover
             class="gallery-masonry"
             style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}
           >
-            {photos.map((photo) => (
-              <PhotoCard src={photo} albumId={albumMeta.id} />
+            {photos.map((photo, index) => (
+              <PhotoCard src={photo} albumId={albumMeta.id} alt={`${albumMeta.name} ${index + 1}`} />
             ))}
           </div>
         )
