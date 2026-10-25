@@ -214,12 +214,6 @@ export const booknavConfig: BooknavGroup[] = [
 				weight: 8,
 			},
 			{
-				title: "0721_Galgame",
-				url: "https://nn0721.icu/",
-				desc: "Ciallo(∠・ω<)",
-				weight: 7,
-			},
-			{
 				title: "米哈社",
 				url: "http://23.225.187.246:3000/#/",
 				desc: "老炮都说好",
