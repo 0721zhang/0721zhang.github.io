@@ -203,7 +203,7 @@ export const booknavConfig: BooknavGroup[] = [
 			},
 			{
 				title: "TouchGal",
-				url: "https://www.touchgal.top/galgame",
+				url: "https://www.touchgal.ink/galgame",
 				desc: "gal下载，懂的都懂",
 				weight: 9,
 			},
