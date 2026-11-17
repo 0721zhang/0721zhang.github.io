@@ -2,8 +2,9 @@
 title: 剪贴板自动输入助手（AutoHotkey v2）
 published: 2026-11-17
 description: 一个简单的 Windows 自动输入脚本，通过快捷键把剪贴板里的文字逐字模拟键盘输入，适用于部分不允许直接粘贴的网页输入框。
+image: ./images/b1.avif
 tags: [工具, 脚本, Windows, AutoHotkey]
-status: developing
+status: published
 order: 2
 link:
   - label: 下载脚本（.rar）
